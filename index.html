@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Difficulty Chart Obby - Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #6dd5fa, #2980b9);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 900px;
+      margin: 30px auto 0 auto;
+      background: rgba(0,0,0,0.7);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+    }
+    th {
+      background: #1e90ff;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .automatic { color: #f1c40f; }
+    .effortles { color: #2ecc40; }
+    .peachful { color: #a3e635; }
+    .easy { color: #00e676; }
+    .normal { color: #00bcd4; }
+    .medium { color: #ffdc00; }
+    .hard { color: #ff4136; }
+    .difficult { color: #b10dc9; }
+    .chart { color: #ff8c00; }
+    .epipleon { color: #ff69b4; }
+    .other { color: #cccccc; }
+    #settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-between;
+      margin: 28px 0 10px 0;
+    }
+    #settings label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    #skin-select {
+      width: 60px;
+      height: 30px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    #player {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #0005;
+      left: 100px;
+      top: 350px;
+      z-index: 2;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #222;
+      border: 2px solid #fff;
+    }
+    #gameArea {
+      width: 100vw;
+      height: 250px;
+      position: relative;
+      background: linear-gradient(90deg, #2980b9 60%, #6dd5fa 100%);
+      margin-bottom: 24px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px #0005;
+    }
+    #joystick-base, #joystick-knob {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      touch-action: none;
+      z-index: 20;
+    }
+    #joystick-base {
+      width: 90px;
+      height: 90px;
+      background: #1118;
+      border-radius: 50%;
+    }
+    #joystick-knob {
+      width: 50px;
+      height: 50px;
+      background: #1e90ffcc;
+      border-radius: 50%;
+      transform: translate(20px, 20px);
+      pointer-events: none;
+    }
+    @media (min-width: 800px) {
+      #joystick-base, #joystick-knob { display: none; }
+    }
+    #win-btn {
+      background: #1e90ff;
+      color: #fff;
+      font-weight: bold;
+      padding: 8px 24px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 8px #0003;
+      transition: background 0.2s;
+    }
+    #win-btn:hover {
+      background: #005fa3;
+    }
+    #leaderboard {
+      margin: 30px 0 0 0;
+    }
+    #leaderboard table {
+      margin: 0;
+      background: #222b;
+    }
+    #leaderboard th, #leaderboard td {
+      background: transparent;
+      color: #fff;
+      border-bottom: 1px solid #333;
+    }
+    #leaderboard th {
+      color: #ffdc00;
+      font-weight: bold;
+    }
+    #leaderboard tr.top td {
+      color: #1e90ff;
+      font-weight: bold;
+      background: #111b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Difficulty Chart Obby</h1>
+    <div id="settings">
+      <label>
+        Όνομα παίκτη:
+        <input type="text" id="player-name" placeholder="Πληκτρολόγησε όνομα" maxlength="15">
+      </label>
+      <label>
+        Skin:
+        <select id="skin-select">
+          <option value="#fff" style="background:#fff">Λευκό</option>
+          <option value="#f44336" style="background:#f44336">Κόκκινο</option>
+          <option value="#4caf50" style="background:#4caf50">Πράσινο</option>
+          <option value="#2196f3" style="background:#2196f3">Μπλε</option>
+          <option value="#ffeb3b" style="background:#ffeb3b">Κίτρινο</option>
+          <option value="#b10dc9" style="background:#b10dc9">Μωβ</option>
+          <option value="#ff69b4" style="background:#ff69b4">Ροζ</option>
+        </select>
+      </label>
+      <label>
+        Multiplier:
+        <select id="multiplier">
+          <option value="1">x1</option>
+          <option value="2">x2</option>
+          <option value="5">x5</option>
+          <option value="10">x10</option>
+        </select>
+      </label>
+    </div>
+    <div id="gameArea">
+      <div id="player">🙂</div>
+      <div id="joystick-base"></div>
+      <div id="joystick-knob"></div>
+    </div>
+    <button id="win-btn">+1 Win!</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Difficulty</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1-10</td><td class="automatic">AUTOMATIC</td><td>Το παιχνίδι κινεί τον παίκτη μόνο του.</td></tr>
+        <tr><td>11-20</td><td class="effortles">EFFORTLES</td><td>Εντελώς απλό, χωρίς κόπο.</td></tr>
+        <tr><td>21-30</td><td class="peachful">PEACHFUL</td><td>Ειρηνικό και άνετο.</td></tr>
+        <tr><td>31-40</td><td class="easy">EASY</td><td>Ιδανικό για αρχάριους.</td></tr>
+        <tr><td>41-50</td><td class="normal">NORMAL</td><td>Τυπικά εμπόδια, μέτρια δυσκολία.</td></tr>
+        <tr><td>51-60</td><td class="medium">MEDIUM</td><td>Λίγο πιο απαιτητικό.</td></tr>
+        <tr><td>61-70</td><td class="hard">HARD</td><td>Μεγάλη πρόκληση!</td></tr>
+        <tr><td>71-80</td><td class="difficult">DIFFICULT</td><td>Για προχωρημένους.</td></tr>
+        <tr><td>81-90</td><td class="chart">CHART</td><td>Το στάδιο του πίνακα δυσκολίας.</td></tr>
+        <tr><td>91-100</td><td class="epipleon">EPIPLEON</td><td>Επιπλέον δυσκολία, μόνο για τους καλύτερους!</td></tr>
+        <tr><td>101-200</td><td class="other">impossible</td><td>IMPOSSIBLE</td></tr>
+        <tr><td>201-1000</td><td class="noHuman">ure greek guy</td>greece only</td></tr>
+      </tbody>
+    </table>
+
+    <div id="leaderboard">
+      <h2 style="margin-top:30px;text-align:center;">Leaderboard</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Όνομα</th>
+            <th>Wins</th>
+            <th>Skin</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    // Player settings
+    const playerNameInput = document.getElementById('player-name');
+    const skinSelect = document.getElementById('skin-select');
+    const playerDiv = document.getElementById('player');
+    const multiplierSelect = document.getElementById('multiplier');
+
+    // Store state
+    let playerName = localStorage.getItem('obby_name') || '';
+    let playerSkin = localStorage.getItem('obby_skin') || '#fff';
+    let wins = parseInt(localStorage.getItem('obby_wins') || '0');
+    let multiplier = parseInt(localStorage.getItem('obby_multiplier') || '1');
+    let leaderboard = [];
+
+    // Restore values
+    playerNameInput.value = playerName;
+    skinSelect.value = playerSkin;
+    multiplierSelect.value = multiplier;
+
+    function updatePlayerAppearance() {
+      playerDiv.style.background = skinSelect.value;
+      playerDiv.textContent = playerName ? playerName[0].toUpperCase() : '🙂';
+    }
+    playerNameInput.addEventListener('input', () => {
+      playerName = playerNameInput.value.trim();
+      localStorage.setItem('obby_name', playerName);
+      updatePlayerAppearance();
+    });
+    skinSelect.addEventListener('change', () => {
+      playerSkin = skinSelect.value;
+      localStorage.setItem('obby_skin', playerSkin);
+      updatePlayerAppearance();
+    });
+    multiplierSelect.addEventListener('change', () => {
+      multiplier = parseInt(multiplierSelect.value);
+      localStorage.setItem('obby_multiplier', multiplier);
+    });
+    updatePlayerAppearance();
+
+    // Game Movement
+    let pos = { x: 100, y: 80 };
+    let speed = 3;
+    let keys = { w: false, a: false, s: false, d: false };
+    document.addEventListener('keydown', e => {
+      if (e.key === 'w') keys.w = true;
+      if (e.key === 'a') keys.a = true;
+      if (e.key === 's') keys.s = true;
+      if (e.key === 'd') keys.d = true;
+    });
+    document.addEventListener('keyup', e => {
+      if (e.key === 'w') keys.w = false;
+      if (e.key === 'a') keys.a = false;
+      if (e.key === 's') keys.s = false;
+      if (e.key === 'd') keys.d = false;
+    });
+
+    // Joystick logic
+    const base = document.getElementById('joystick-base');
+    const knob = document.getElementById('joystick-knob');
+    let joystickActive = false;
+    let joyCenter = { x: 75, y: 210 };
+    let joyValue = { x: 0, y: 0 };
+    let isTouch = false;
+
+    function updateJoystickPosition(x, y) {
+      let dx = x - joyCenter.x;
+      let dy = y - joyCenter.y;
+      let dist = Math.sqrt(dx*dx + dy*dy);
+      let max = 30;
+      if (dist > max) {
+        dx = dx * max / dist;
+        dy = dy * max / dist;
+      }
+      knob.style.transform = `translate(${20+dx}px, ${20+dy}px)`;
+      joyValue.x = dx / max;
+      joyValue.y = dy / max;
+    }
+    function resetJoystick() {
+      knob.style.transform = 'translate(20px, 20px)';
+      joyValue = { x: 0, y: 0 };
+    }
+    base.addEventListener('touchstart', e => {
+      e.preventDefault();
+      isTouch = true;
+      joystickActive = true;
+    });
+    base.addEventListener('touchmove', e => {
+      e.preventDefault();
+      isTouch = true;
+      joystickActive = true;
+      const touch = e.touches[0];
+      updateJoystickPosition(touch.clientX, touch.clientY);
+    });
+    base.addEventListener('touchend', e => {
+      e.preventDefault();
+      joystickActive = false;
+      resetJoystick();
+    });
+
+    function loop() {
+      // Keyboard
+      let vx = 0, vy = 0;
+      if (keys.w) vy -= 1;
+      if (keys.s) vy += 1;
+      if (keys.a) vx -= 1;
+      if (keys.d) vx += 1;
+      // Joystick (on mobile)
+      if (isTouch) {
+        vx = joyValue.x;
+        vy = joyValue.y;
+      }
+      // Normalize
+      let len = Math.sqrt(vx*vx + vy*vy);
+      if (len > 1) { vx /= len; vy /= len; }
+      pos.x += vx * speed;
+      pos.y += vy * speed;
+      // Boundaries (in #gameArea)
+      pos.x = Math.max(0, Math.min(window.innerWidth-70, pos.x));
+      pos.y = Math.max(0, Math.min(200, pos.y));
+      playerDiv.style.left = pos.x + 'px';
+      playerDiv.style.top = pos.y + 'px';
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    function resizeJoy() {
+      joyCenter = { x: base.offsetLeft + 45, y: base.offsetTop + 175 };
+    }
+    window.addEventListener('resize', resizeJoy);
+    resizeJoy();
+
+    // Leaderboard logic
+    function loadLeaderboard() {
+      try {
+        leaderboard = JSON.parse(localStorage.getItem('obby_leaderboard') || '[]');
+      } catch { leaderboard = []; }
+    }
+    function saveLeaderboard() {
+      localStorage.setItem('obby_leaderboard', JSON.stringify(leaderboard));
+    }
+    function updateLeaderboard() {
+      loadLeaderboard();
+      // Update own wins if in leaderboard, else add
+      if (playerName) {
+        let found = leaderboard.find(p => p.name === playerName);
+        if (found) {
+          found.wins = wins;
+          found.skin = playerSkin;
+        } else {
+          leaderboard.push({name: playerName, wins: wins, skin: playerSkin});
+        }
+      }
+      leaderboard.sort((a,b) => b.wins - a.wins);
+      saveLeaderboard();
+      // Render
+      const tbody = document.getElementById('leaderboard-body');
+      tbody.innerHTML = '';
+      leaderboard.forEach((p,i) => {
+        const tr = document.createElement('tr');
+        if (i === 0) tr.className = 'top';
+        tr.innerHTML = `<td>${i+1}</td>
+          <td>${p.name || '---'}</td>
+          <td>${p.wins}</td>
+          <td><span style="display:inline-block;width:24px;height:24px;background:${p.skin};border-radius:6px;border:1px solid #fff;"></span></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    loadLeaderboard();
+    updateLeaderboard();
+
+    // Win button
+    const winBtn = document.getElementById('win-btn');
+    winBtn.addEventListener('click', () => {
+      if (!playerName) {
+        alert("Βάλε όνομα παίκτη!");
+        return;
+      }
+      wins += multiplier;
+      localStorage.setItem('obby_wins', wins);
+      updateLeaderboard();
+    });
+
+    // Restore wins per player
+    playerNameInput.addEventListener('blur', () => {
+      playerName = playerNameInput.value.trim();
+      let found = leaderboard.find(p => p.name === playerName);
+      wins = found ? found.wins : 0;
+      localStorage.setItem('obby_wins', wins);
+      updateLeaderboard();
+    });
+  </script>
+</body>
+</html>
