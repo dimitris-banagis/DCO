@@ -2,436 +2,587 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Difficulty Chart Obby - Demo</title>
+  <title>3D Difficulty Chart Obby - Super Demo</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #6dd5fa, #2980b9);
-      color: #fff;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
+    html, body { margin:0; padding:0; width:100vw; height:100vh; overflow:hidden; background: #141a24;}
+    #overlay {
+      position: absolute; top: 10px; left: 0; width:100vw; z-index: 10;
+      text-align: center; color: #fff; font-size: 2em; font-family: Arial,sans-serif;
+      pointer-events: none; text-shadow: 1px 1px 8px #000c; letter-spacing:2px;
+      user-select:none;
     }
-    .container {
-      max-width: 900px;
-      margin: 30px auto 0 auto;
-      background: rgba(0,0,0,0.7);
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
+    #ui-panel {
+      position: absolute; left: 24px; top: 20px; z-index: 30; background:rgba(0,0,0,0.75); padding:16px 28px 16px 16px;
+      border-radius:12px; font-size: 1.1em; color: #fff; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.25);
+      display: flex; flex-direction: column; gap: 12px; min-width: 260px; max-width: 340px;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 12px;
+    #ui-panel label { font-weight: bold; }
+    #skin { width: 60px; height: 26px; border-radius: 8px; border: none; cursor: pointer;}
+    #trail { width: 60px; height: 26px; border-radius: 8px; border: none; cursor: pointer;}
+    #multiplier { width: 70px; height: 26px; border-radius: 8px;}
+    #name { font-size: 1em; border-radius:5px; border:1px solid #1e90ff; padding:3px 8px;}
+    #winBtn {
+      background: #1e90ff; color: #fff; font-weight: bold; border-radius: 7px; border: none;
+      padding: 7px 18px; font-size: 1.05em; cursor: pointer; margin-top: 7px; box-shadow: 0 2px 8px #0003;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
+    #winBtn:hover { background: #005fa3; }
+    #challengePanel {
+      background: #222d; color: #ffdc00; padding: 8px 14px; border-radius: 8px; margin-top: 8px; font-size: 1.02em;
+      text-align: center; font-weight: bold;
     }
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border-bottom: 1px solid #444;
-    }
-    th {
-      background: #1e90ff;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .automatic { color: #f1c40f; }
-    .effortles { color: #2ecc40; }
-    .peachful { color: #a3e635; }
-    .easy { color: #00e676; }
-    .normal { color: #00bcd4; }
-    .medium { color: #ffdc00; }
-    .hard { color: #ff4136; }
-    .difficult { color: #b10dc9; }
-    .chart { color: #ff8c00; }
-    .epipleon { color: #ff69b4; }
-    .other { color: #cccccc; }
-    #settings {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: space-between;
-      margin: 28px 0 10px 0;
-    }
-    #settings label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: bold;
-      font-size: 1rem;
-    }
-    #skin-select {
-      width: 60px;
-      height: 30px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-    }
-    #player {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px #0005;
-      left: 100px;
-      top: 350px;
-      z-index: 2;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: #222;
-      border: 2px solid #fff;
-    }
-    #gameArea {
-      width: 100vw;
-      height: 250px;
-      position: relative;
-      background: linear-gradient(90deg, #2980b9 60%, #6dd5fa 100%);
-      margin-bottom: 24px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 16px #0005;
-    }
-    #joystick-base, #joystick-knob {
-      position: absolute;
-      bottom: 30px;
-      left: 30px;
-      touch-action: none;
-      z-index: 20;
-    }
-    #joystick-base {
-      width: 90px;
-      height: 90px;
-      background: #1118;
-      border-radius: 50%;
-    }
-    #joystick-knob {
-      width: 50px;
-      height: 50px;
-      background: #1e90ffcc;
-      border-radius: 50%;
-      transform: translate(20px, 20px);
-      pointer-events: none;
-    }
-    @media (min-width: 800px) {
-      #joystick-base, #joystick-knob { display: none; }
-    }
-    #win-btn {
-      background: #1e90ff;
-      color: #fff;
-      font-weight: bold;
-      padding: 8px 24px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      margin-top: 24px;
-      margin-bottom: 8px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      box-shadow: 0 2px 8px #0003;
-      transition: background 0.2s;
-    }
-    #win-btn:hover {
-      background: #005fa3;
+    #leaderboard-panel {
+      position: absolute; right: 24px; top: 20px; z-index: 30; background:rgba(0,0,0,0.78); padding:18px;
+      border-radius:12px; font-size: 1em; color: #fff; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.25);
+      min-width: 260px; max-width: 340px;
     }
     #leaderboard {
-      margin: 30px 0 0 0;
-    }
-    #leaderboard table {
-      margin: 0;
-      background: #222b;
+      width: 100%; border-collapse: collapse; margin-top: 9px;
     }
     #leaderboard th, #leaderboard td {
-      background: transparent;
-      color: #fff;
-      border-bottom: 1px solid #333;
+      padding: 6px 8px; text-align: left; border-bottom: 1px solid #333;
     }
-    #leaderboard th {
-      color: #ffdc00;
-      font-weight: bold;
+    #leaderboard th { color: #ffdc00; }
+    #leaderboard tr.top td { color: #1e90ff; font-weight: bold; background: #111b; }
+    #leaderboard tr.me td {  background: #1463a5cc; }
+    #joystick-base, #joystick-knob {
+      position: absolute; bottom: 40px; left: 40px; touch-action: none; z-index: 40; display: none;
     }
-    #leaderboard tr.top td {
-      color: #1e90ff;
-      font-weight: bold;
-      background: #111b;
+    #joystick-base {
+      width: 100px; height: 100px; background: #222a; border-radius: 50%;
+    }
+    #joystick-knob {
+      width: 60px; height: 60px; background: #1e90ffcc; border-radius: 50%; transform: translate(20px, 20px); pointer-events: none;
+    }
+    @media (max-width: 800px) {
+      #ui-panel { min-width:160px; padding:10px 10px 10px 10px;}
+      #leaderboard-panel { min-width:150px; padding:10px;}
+      #joystick-base, #joystick-knob { display: block; }
+    }
+    .stage-label {
+      background: #0008; border-radius: 9px; color: #fff; font-size: 1.18em; padding: 7px 18px; display:inline-block; margin-top:8px;
+      text-shadow:1px 1px 2px #000a;
+    }
+    #timer, #deaths { font-weight: bold; color: #1e90ff; margin-left: 10px;}
+    #checkpoint { font-size: 0.94em; color: #ff8c00; margin-left: 14px;}
+    .trail-dot {
+      pointer-events: none; position: absolute;
+      border-radius: 50%; opacity: 0.7; z-index: 9;
+      box-shadow: 0 2px 6px #0007;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Difficulty Chart Obby</h1>
-    <div id="settings">
-      <label>
-        Όνομα παίκτη:
-        <input type="text" id="player-name" placeholder="Πληκτρολόγησε όνομα" maxlength="15">
-      </label>
-      <label>
-        Skin:
-        <select id="skin-select">
-          <option value="#fff" style="background:#fff">Λευκό</option>
-          <option value="#f44336" style="background:#f44336">Κόκκινο</option>
-          <option value="#4caf50" style="background:#4caf50">Πράσινο</option>
-          <option value="#2196f3" style="background:#2196f3">Μπλε</option>
-          <option value="#ffeb3b" style="background:#ffeb3b">Κίτρινο</option>
-          <option value="#b10dc9" style="background:#b10dc9">Μωβ</option>
-          <option value="#ff69b4" style="background:#ff69b4">Ροζ</option>
-        </select>
-      </label>
-      <label>
-        Multiplier:
-        <select id="multiplier">
-          <option value="1">x1</option>
-          <option value="2">x2</option>
-          <option value="5">x5</option>
-          <option value="10">x10</option>
-        </select>
-      </label>
+  <div id="overlay">Reach Stage 250 to Win!</div>
+  <div id="ui-panel">
+    <div><label for="name">Όνομα:</label> <input type="text" id="name" maxlength="12" placeholder="Player"></div>
+    <div><label for="skin">Skin:</label>
+      <select id="skin">
+        <option value="#fff" style="background:#fff">Λευκό</option>
+        <option value="#f44336" style="background:#f44336">Κόκκινο</option>
+        <option value="#4caf50" style="background:#4caf50">Πράσινο</option>
+        <option value="#2196f3" style="background:#2196f3">Μπλε</option>
+        <option value="#ffeb3b" style="background:#ffeb3b">Κίτρινο</option>
+        <option value="#b10dc9" style="background:#b10dc9">Μωβ</option>
+        <option value="#ff69b4" style="background:#ff69b4">Ροζ</option>
+        <option value="#222" style="background:#222;color:#fff;">Μαύρο</option>
+      </select>
     </div>
-    <div id="gameArea">
-      <div id="player">🙂</div>
-      <div id="joystick-base"></div>
-      <div id="joystick-knob"></div>
+    <div><label for="trail">Trail:</label>
+      <select id="trail">
+        <option value="#fff" style="background:#fff">Λευκό</option>
+        <option value="#f44336" style="background:#f44336">Κόκκινο</option>
+        <option value="#4caf50" style="background:#4caf50">Πράσινο</option>
+        <option value="#2196f3" style="background:#2196f3">Μπλε</option>
+        <option value="#ffeb3b" style="background:#ffeb3b">Κίτρινο</option>
+        <option value="#b10dc9" style="background:#b10dc9">Μωβ</option>
+        <option value="#ff69b4" style="background:#ff69b4">Ροζ</option>
+        <option value="#222" style="background:#222;color:#fff;">Μαύρο</option>
+        <option value="rainbow">Ουράνιο Τόξο</option>
+      </select>
     </div>
-    <button id="win-btn">+1 Win!</button>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Stage</th>
-          <th>Difficulty</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>1-10</td><td class="automatic">AUTOMATIC</td><td>Το παιχνίδι κινεί τον παίκτη μόνο του.</td></tr>
-        <tr><td>11-20</td><td class="effortles">EFFORTLES</td><td>Εντελώς απλό, χωρίς κόπο.</td></tr>
-        <tr><td>21-30</td><td class="peachful">PEACHFUL</td><td>Ειρηνικό και άνετο.</td></tr>
-        <tr><td>31-40</td><td class="easy">EASY</td><td>Ιδανικό για αρχάριους.</td></tr>
-        <tr><td>41-50</td><td class="normal">NORMAL</td><td>Τυπικά εμπόδια, μέτρια δυσκολία.</td></tr>
-        <tr><td>51-60</td><td class="medium">MEDIUM</td><td>Λίγο πιο απαιτητικό.</td></tr>
-        <tr><td>61-70</td><td class="hard">HARD</td><td>Μεγάλη πρόκληση!</td></tr>
-        <tr><td>71-80</td><td class="difficult">DIFFICULT</td><td>Για προχωρημένους.</td></tr>
-        <tr><td>81-90</td><td class="chart">CHART</td><td>Το στάδιο του πίνακα δυσκολίας.</td></tr>
-        <tr><td>91-100</td><td class="epipleon">EPIPLEON</td><td>Επιπλέον δυσκολία, μόνο για τους καλύτερους!</td></tr>
-        <tr><td>101-200</td><td class="other">impossible</td><td>IMPOSSIBLE</td></tr>
-        <tr><td>201-1000</td><td class="noHuman">ure greek guy</td>greece only</td></tr>
-      </tbody>
-    </table>
-
-    <div id="leaderboard">
-      <h2 style="margin-top:30px;text-align:center;">Leaderboard</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Όνομα</th>
-            <th>Wins</th>
-            <th>Skin</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboard-body"></tbody>
-      </table>
+    <div><label for="multiplier">Multiplier:</label>
+      <select id="multiplier">
+        <option value="1">x1</option>
+        <option value="2">x2</option>
+        <option value="5">x5</option>
+        <option value="10">x10</option>
+      </select>
+    </div>
+    <div>
+      <span id="timer">00:00</span>
+      <span id="deaths">Deaths: 0</span>
+      <span id="checkpoint"></span>
+    </div>
+    <button id="winBtn">+Win (μόνο για δοκιμή)!</button>
+    <div id="challengePanel"></div>
+    <div style="font-size:0.97em;margin-top:6px;">
+      Κινήσου με <b>WASD</b> ή joystick.<br>
+      Φτάσε stage 250 για win!
     </div>
   </div>
+  <div id="leaderboard-panel">
+    <div style="font-weight:bold;color:#ffdc00;text-align:center;">Leaderboard</div>
+    <table id="leaderboard">
+      <thead>
+        <tr><th>Όνομα</th><th>Wins</th><th>Best Time</th><th>Deaths</th><th>Skin</th></tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+  </div>
+  <div id="joystick-base"></div>
+  <div id="joystick-knob"></div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
   <script>
-    // Player settings
-    const playerNameInput = document.getElementById('player-name');
-    const skinSelect = document.getElementById('skin-select');
-    const playerDiv = document.getElementById('player');
-    const multiplierSelect = document.getElementById('multiplier');
+/* ====== CONFIGURATION ====== */
+const OBBY_STAGES = 250;
+const CHECKPOINT_EVERY = 10;
+const PLATFORM_SIZE = 4;
+const PLATFORM_SPACING = 6;
+const PLAYER_SIZE = 1;
+const GRAVITY = 0.027;
+const MOVE_SPD = 0.21;
+const JUMP_POWER = 0.23;
+const PLAYER_START = {x:0, y:1.1, z:0};
 
-    // Store state
-    let playerName = localStorage.getItem('obby_name') || '';
-    let playerSkin = localStorage.getItem('obby_skin') || '#fff';
-    let wins = parseInt(localStorage.getItem('obby_wins') || '0');
-    let multiplier = parseInt(localStorage.getItem('obby_multiplier') || '1');
-    let leaderboard = [];
-
-    // Restore values
-    playerNameInput.value = playerName;
-    skinSelect.value = playerSkin;
-    multiplierSelect.value = multiplier;
-
-    function updatePlayerAppearance() {
-      playerDiv.style.background = skinSelect.value;
-      playerDiv.textContent = playerName ? playerName[0].toUpperCase() : '🙂';
+const DIFFICULTY_NAMES = [
+  "AUTOMATIC","EFFORTLES","PEACHFUL","EASY","NORMAL",
+  "MEDIUM","HARD","DIFFICULT","CHART","EPIPLEON","OTHER"
+];
+const DIFFICULTY_COLORS = [
+  0xf1c40f, 0x2ecc40, 0xa3e635, 0x00e676, 0x00bcd4,
+  0xffdc00, 0xff4136, 0xb10dc9, 0xff8c00, 0xff69b4, 0xcccccc
+];
+const STAGE_DIFFICULTY = idx => {
+  if(idx<10) return 0;
+  if(idx<20) return 1;
+  if(idx<30) return 2;
+  if(idx<40) return 3;
+  if(idx<50) return 4;
+  if(idx<60) return 5;
+  if(idx<70) return 6;
+  if(idx<80) return 7;
+  if(idx<90) return 8;
+  if(idx<100) return 9;
+  return 10;
+};
+/* ====== UI LOGIC ====== */
+const nameInput = document.getElementById('name');
+const skinSelect = document.getElementById('skin');
+const trailSelect = document.getElementById('trail');
+const multiplierSelect = document.getElementById('multiplier');
+const winBtn = document.getElementById('winBtn');
+const timerSpan = document.getElementById('timer');
+const deathsSpan = document.getElementById('deaths');
+const checkpointSpan = document.getElementById('checkpoint');
+const challengePanel = document.getElementById('challengePanel');
+let playerName = localStorage.getItem('obby_name') || 'Player';
+let playerSkin = localStorage.getItem('obby_skin') || '#fff';
+let playerTrail = localStorage.getItem('obby_trail') || '#fff';
+let multiplier = parseInt(localStorage.getItem('obby_multiplier') || '1');
+let wins = parseInt(localStorage.getItem('obby_wins') || '0');
+let bestTime = parseFloat(localStorage.getItem('obby_bestTime') || '0');
+let bestDeaths = parseInt(localStorage.getItem('obby_bestDeaths') || '0');
+let leaderboard = [];
+let dailySeed = (Math.floor(Date.now()/(1000*60*60*24)));
+nameInput.value = playerName;
+skinSelect.value = playerSkin;
+trailSelect.value = playerTrail;
+multiplierSelect.value = multiplier;
+challengePanel.textContent = "Daily Challenge: Complete in under 160s!";
+let timer = 0, timerRunning = false, deaths=0;
+function formatTime(t) {
+  let m = Math.floor(t/60), s = Math.floor(t%60);
+  return (m<10?'0':'')+m+":"+(s<10?'0':'')+s;
+}
+function updateStatsUI() {
+  timerSpan.textContent = formatTime(timer);
+  deathsSpan.textContent = "Deaths: "+deaths;
+}
+function updateCheckpointUI(cp) {
+  if(cp) checkpointSpan.textContent = `Checkpoint: Stage ${cp}`;
+  else checkpointSpan.textContent = '';
+}
+function updatePlayerSettings() {
+  playerName = nameInput.value.trim() || 'Player';
+  playerSkin = skinSelect.value;
+  playerTrail = trailSelect.value;
+  multiplier = parseInt(multiplierSelect.value);
+  localStorage.setItem('obby_name', playerName);
+  localStorage.setItem('obby_skin', playerSkin);
+  localStorage.setItem('obby_trail', playerTrail);
+  localStorage.setItem('obby_multiplier', multiplier);
+  updateLeaderboard();
+  if(window.playerMesh) playerMesh.material.color.set(playerSkin);
+}
+nameInput.addEventListener('input', updatePlayerSettings);
+skinSelect.addEventListener('change', updatePlayerSettings);
+trailSelect.addEventListener('change', updatePlayerSettings);
+multiplierSelect.addEventListener('change', updatePlayerSettings);
+function loadLeaderboard() {
+  try { leaderboard = JSON.parse(localStorage.getItem('obby_leaderboard') || '[]'); } catch { leaderboard = []; }
+}
+function saveLeaderboard() {
+  localStorage.setItem('obby_leaderboard', JSON.stringify(leaderboard));
+}
+function updateLeaderboard() {
+  loadLeaderboard();
+  if (playerName) {
+    let found = leaderboard.find(p => p.name === playerName);
+    if (found) {
+      found.wins = wins;
+      found.skin = playerSkin;
+      found.bestTime = bestTime;
+      found.bestDeaths = bestDeaths;
     }
-    playerNameInput.addEventListener('input', () => {
-      playerName = playerNameInput.value.trim();
-      localStorage.setItem('obby_name', playerName);
-      updatePlayerAppearance();
-    });
-    skinSelect.addEventListener('change', () => {
-      playerSkin = skinSelect.value;
-      localStorage.setItem('obby_skin', playerSkin);
-      updatePlayerAppearance();
-    });
-    multiplierSelect.addEventListener('change', () => {
-      multiplier = parseInt(multiplierSelect.value);
-      localStorage.setItem('obby_multiplier', multiplier);
-    });
-    updatePlayerAppearance();
-
-    // Game Movement
-    let pos = { x: 100, y: 80 };
-    let speed = 3;
-    let keys = { w: false, a: false, s: false, d: false };
-    document.addEventListener('keydown', e => {
-      if (e.key === 'w') keys.w = true;
-      if (e.key === 'a') keys.a = true;
-      if (e.key === 's') keys.s = true;
-      if (e.key === 'd') keys.d = true;
-    });
-    document.addEventListener('keyup', e => {
-      if (e.key === 'w') keys.w = false;
-      if (e.key === 'a') keys.a = false;
-      if (e.key === 's') keys.s = false;
-      if (e.key === 'd') keys.d = false;
-    });
-
-    // Joystick logic
-    const base = document.getElementById('joystick-base');
-    const knob = document.getElementById('joystick-knob');
-    let joystickActive = false;
-    let joyCenter = { x: 75, y: 210 };
-    let joyValue = { x: 0, y: 0 };
-    let isTouch = false;
-
-    function updateJoystickPosition(x, y) {
-      let dx = x - joyCenter.x;
-      let dy = y - joyCenter.y;
-      let dist = Math.sqrt(dx*dx + dy*dy);
-      let max = 30;
-      if (dist > max) {
-        dx = dx * max / dist;
-        dy = dy * max / dist;
+    else {
+      leaderboard.push({name: playerName, wins: wins, skin: playerSkin, bestTime: bestTime, bestDeaths: bestDeaths});
+    }
+  }
+  leaderboard.sort((a,b) => b.wins - a.wins || (a.bestTime||9999)-(b.bestTime||9999));
+  saveLeaderboard();
+  const tbody = document.getElementById('leaderboard-body');
+  tbody.innerHTML = '';
+  leaderboard.forEach((p,i) => {
+    const tr = document.createElement('tr');
+    if (i === 0) tr.className = 'top';
+    if (p.name === playerName) tr.className += ' me';
+    tr.innerHTML = `<td>${p.name||'---'}</td>
+      <td>${p.wins}</td>
+      <td>${p.bestTime?formatTime(p.bestTime):"--:--"}</td>
+      <td>${(p.bestDeaths!==undefined)?p.bestDeaths:'-'}</td>
+      <td><span style="display:inline-block;width:22px;height:22px;background:${p.skin};border-radius:4px;border:1px solid #fff;"></span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+winBtn.addEventListener('click', () => {
+  if (!playerName) { alert("Βάλε όνομα!"); return;}
+  wins += multiplier;
+  localStorage.setItem('obby_wins', wins);
+  updateLeaderboard();
+});
+updateLeaderboard();
+/* ====== 3D SCENE, PLAYER & GAME ====== */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x141a24);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1200);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+// LIGHTS
+const light = new THREE.DirectionalLight(0xffffff, 1.1);
+light.position.set(7,18,14);
+scene.add(light);
+const amb = new THREE.AmbientLight(0x8888aa, 0.55);
+scene.add(amb);
+// PLAYER
+const playerGeo = new THREE.BoxGeometry(PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE);
+const playerMat = new THREE.MeshStandardMaterial({color: playerSkin});
+const playerMesh = new THREE.Mesh(playerGeo, playerMat);
+playerMesh.position.set(PLAYER_START.x, PLAYER_START.y, PLAYER_START.z);
+scene.add(playerMesh);
+window.playerMesh = playerMesh; // for skin update
+// TRAIL (cosmetic)
+let trailHistory = [];
+function addTrailDot(x, y, z, color) {
+  if(!document.body) return;
+  let dot = document.createElement('div');
+  dot.className = 'trail-dot';
+  let px = (x/window.innerWidth)*window.innerWidth;
+  let py = (y/window.innerHeight)*window.innerHeight;
+  dot.style.width = dot.style.height = "18px";
+  dot.style.background = color;
+  dot.style.left = `${px}px`;
+  dot.style.top = `${py}px`;
+  dot.style.position = 'absolute';
+  document.body.appendChild(dot);
+  setTimeout(()=>{dot.remove();}, 220);
+}
+function renderTrail() {
+  // In 3D: project to screen
+  let v = playerMesh.position.clone();
+  v.project(camera);
+  let sx = (v.x + 1) / 2 * window.innerWidth;
+  let sy = (-v.y + 1) / 2 * window.innerHeight;
+  let color = playerTrail==='rainbow' ? `hsl(${Math.floor(Date.now()/6)%360},90%,60%)` : playerTrail;
+  addTrailDot(sx, sy, 0, color);
+}
+/* ====== STAGE GENERATION ====== */
+const checkpoints = [];
+const platformGeo = new THREE.BoxGeometry(PLATFORM_SIZE, 0.5, PLATFORM_SIZE);
+const movingObstacles = [];
+const disappearingPlatforms = [];
+const fallingPlatforms = [];
+const trampolines = [];
+for(let i=0; i<OBBY_STAGES; ++i) {
+  // Basic platform
+  const mat = new THREE.MeshStandardMaterial({color: DIFFICULTY_COLORS[STAGE_DIFFICULTY(i)]});
+  const mesh = new THREE.Mesh(platformGeo, mat);
+  mesh.position.set(0, 0, i*PLATFORM_SPACING);
+  scene.add(mesh);
+  // Checkpoints
+  if(i%CHECKPOINT_EVERY===0) checkpoints.push(i+1);
+  // Moving obstacles: κάθε 25 stages
+  if(i>0 && i%25===0) {
+    const obsGeo = new THREE.BoxGeometry(2,1,2);
+    const obsMat = new THREE.MeshStandardMaterial({color:0x111});
+    const obs = new THREE.Mesh(obsGeo, obsMat);
+    obs.position.set(2.3,1,i*PLATFORM_SPACING+2);
+    obs.userData = {move:true, origin:obs.position.x, dir:1};
+    scene.add(obs);
+    movingObstacles.push(obs);
+  }
+  // Disappearing platforms: κάθε 20 stages
+  if(i>0 && i%20===0) {
+    const discGeo = new THREE.BoxGeometry(2,0.5,2);
+    const discMat = new THREE.MeshStandardMaterial({color:0xffff0088, transparent:true, opacity:1});
+    const disc = new THREE.Mesh(discGeo, discMat);
+    disc.position.set(-2.3,0.1,i*PLATFORM_SPACING-2);
+    disc.userData = {disappear:true, t:0};
+    scene.add(disc);
+    disappearingPlatforms.push(disc);
+  }
+  // Falling platforms: κάθε 30 stages
+  if(i>0 && i%30===0) {
+    const fallGeo = new THREE.BoxGeometry(2,0.5,2);
+    const fallMat = new THREE.MeshStandardMaterial({color:0x607d8b});
+    const fall = new THREE.Mesh(fallGeo, fallMat);
+    fall.position.set(2.3,0.1,i*PLATFORM_SPACING-2);
+    fall.userData = {fall:true, t:0, fallen:false, respawnTime:0};
+    scene.add(fall);
+    fallingPlatforms.push(fall);
+  }
+  // Trampolines: κάθε 40 stages
+  if(i>0 && i%40===0) {
+    const trampGeo = new THREE.CylinderGeometry(1,1,0.25,16);
+    const trampMat = new THREE.MeshStandardMaterial({color:0x00ffea, emissive:0x2222ff});
+    const tramp = new THREE.Mesh(trampGeo, trampMat);
+    tramp.position.set(-2.3,0.25,i*PLATFORM_SPACING+1.5);
+    tramp.userData = {tramp:true};
+    scene.add(tramp);
+    trampolines.push(tramp);
+  }
+}
+const groundGeo = new THREE.PlaneGeometry(30, OBBY_STAGES*8);
+const groundMat = new THREE.MeshStandardMaterial({color:0x2a3844});
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.position.set(0,0,OBBY_STAGES*3);
+ground.rotation.x = -Math.PI/2;
+scene.add(ground);
+/* ====== CAMERA LOGIC ====== */
+function updateCamera() {
+  camera.position.lerp(new THREE.Vector3(
+    playerMesh.position.x, 
+    playerMesh.position.y + 6, 
+    playerMesh.position.z + 12
+  ), 0.13);
+  camera.lookAt(new THREE.Vector3(
+    playerMesh.position.x, 
+    playerMesh.position.y + 1.4, 
+    playerMesh.position.z
+  ));
+}
+/* ====== GAME LOGIC ====== */
+let velocity = new THREE.Vector3();
+let onGround = true;
+let keys = {w:false,a:false,s:false,d:false, ' ':false};
+document.addEventListener('keydown', e => {
+  if(e.key==='w') keys.w = true;
+  if(e.key==='a') keys.a = true;
+  if(e.key==='s') keys.s = true;
+  if(e.key==='d') keys.d = true;
+  if(e.key===' ') keys[' '] = true;
+});
+document.addEventListener('keyup', e => {
+  if(e.key==='w') keys.w = false;
+  if(e.key==='a') keys.a = false;
+  if(e.key==='s') keys.s = false;
+  if(e.key==='d') keys.d = false;
+  if(e.key===' ') keys[' '] = false;
+});
+/* ====== JOYSTICK FOR MOBILE ====== */
+const base = document.getElementById('joystick-base');
+const knob = document.getElementById('joystick-knob');
+let joyValue = {x:0, y:0};
+let joyActive = false;
+function joystickPos(x, y) {
+  let dx = x - (base.offsetLeft + 50);
+  let dy = y - (base.offsetTop + 50);
+  let max = 36;
+  let dist = Math.sqrt(dx*dx + dy*dy);
+  if(dist > max) { dx = dx*max/dist; dy = dy*max/dist; }
+  knob.style.transform = `translate(${20+dx}px,${20+dy}px)`;
+  joyValue.x = dx/max;
+  joyValue.y = dy/max;
+}
+base.addEventListener('touchstart', e => { joyActive = true; });
+base.addEventListener('touchmove', e => {
+  joyActive = true;
+  const touch = e.touches[0];
+  joystickPos(touch.clientX, touch.clientY);
+});
+base.addEventListener('touchend', e => {
+  joyActive = false;
+  knob.style.transform = 'translate(20px,20px)';
+  joyValue.x = 0; joyValue.y = 0;
+});
+/* ==== ANIMATION LOOP & GAMEPLAY ==== */
+let won = false, lastStage = 1, lastStageLabel = "";
+let lastCheckpoint = 1;
+function respawn() {
+  playerMesh.position.set(0, 1.1, (lastCheckpoint-1)*PLATFORM_SPACING);
+  velocity.set(0,0,0);
+}
+function resetRun() {
+  timer = 0; deaths = 0; lastCheckpoint = 1;
+  updateStatsUI(); updateCheckpointUI(lastCheckpoint);
+  playerMesh.position.set(0, 1.1, 0);
+  velocity.set(0,0,0);
+  timerRunning = true; won = false;
+}
+function animate() {
+  requestAnimationFrame(animate);
+  // Timer
+  if(timerRunning && !won) {
+    timer += 1/60;
+    updateStatsUI();
+  }
+  // Moving obstacles
+  movingObstacles.forEach(obs=>{
+    obs.position.x = obs.userData.origin + Math.sin(Date.now()/700)*2.1*obs.userData.dir;
+  });
+  // Disappearing platforms
+  disappearingPlatforms.forEach(disc=>{
+    disc.userData.t += 0.03;
+    let phase = Math.abs(Math.sin(disc.userData.t));
+    disc.material.opacity = 0.2 + 0.8*phase;
+    disc.visible = disc.material.opacity>0.25;
+  });
+  // Falling platforms
+  fallingPlatforms.forEach(fall=>{
+    if(!fall.userData.fallen) {
+      // If player is on platform (simple check)
+      if(Math.abs(playerMesh.position.x-fall.position.x)<1.4 && Math.abs(playerMesh.position.z-fall.position.z)<1.4 && Math.abs(playerMesh.position.y-1.1)<0.49) {
+        fall.userData.fallen = true;
+        fall.userData.respawnTime = Date.now()+1500;
       }
-      knob.style.transform = `translate(${20+dx}px, ${20+dy}px)`;
-      joyValue.x = dx / max;
-      joyValue.y = dy / max;
-    }
-    function resetJoystick() {
-      knob.style.transform = 'translate(20px, 20px)';
-      joyValue = { x: 0, y: 0 };
-    }
-    base.addEventListener('touchstart', e => {
-      e.preventDefault();
-      isTouch = true;
-      joystickActive = true;
-    });
-    base.addEventListener('touchmove', e => {
-      e.preventDefault();
-      isTouch = true;
-      joystickActive = true;
-      const touch = e.touches[0];
-      updateJoystickPosition(touch.clientX, touch.clientY);
-    });
-    base.addEventListener('touchend', e => {
-      e.preventDefault();
-      joystickActive = false;
-      resetJoystick();
-    });
-
-    function loop() {
-      // Keyboard
-      let vx = 0, vy = 0;
-      if (keys.w) vy -= 1;
-      if (keys.s) vy += 1;
-      if (keys.a) vx -= 1;
-      if (keys.d) vx += 1;
-      // Joystick (on mobile)
-      if (isTouch) {
-        vx = joyValue.x;
-        vy = joyValue.y;
+    } else {
+      fall.position.y -= 0.22;
+      if(fall.position.y<-3 && Date.now()>fall.userData.respawnTime) {
+        fall.position.y = 0.1;
+        fall.userData.fallen = false;
       }
-      // Normalize
-      let len = Math.sqrt(vx*vx + vy*vy);
-      if (len > 1) { vx /= len; vy /= len; }
-      pos.x += vx * speed;
-      pos.y += vy * speed;
-      // Boundaries (in #gameArea)
-      pos.x = Math.max(0, Math.min(window.innerWidth-70, pos.x));
-      pos.y = Math.max(0, Math.min(200, pos.y));
-      playerDiv.style.left = pos.x + 'px';
-      playerDiv.style.top = pos.y + 'px';
-      requestAnimationFrame(loop);
     }
-    loop();
-
-    function resizeJoy() {
-      joyCenter = { x: base.offsetLeft + 45, y: base.offsetTop + 175 };
+  });
+  // Trampolines
+  trampolines.forEach(tramp=>{
+    // If player touches
+    if(Math.abs(playerMesh.position.x-tramp.position.x)<1.2 && Math.abs(playerMesh.position.z-tramp.position.z)<1.2 && Math.abs(playerMesh.position.y-1.1)<0.6) {
+      velocity.y = 0.4;
     }
-    window.addEventListener('resize', resizeJoy);
-    resizeJoy();
-
-    // Leaderboard logic
-    function loadLeaderboard() {
-      try {
-        leaderboard = JSON.parse(localStorage.getItem('obby_leaderboard') || '[]');
-      } catch { leaderboard = []; }
+  });
+  // Movement input
+  let forward = 0, right = 0;
+  if(window.innerWidth > 800) {
+    if(keys.w) forward += 1;
+    if(keys.s) forward -= 1;
+    if(keys.a) right -= 1;
+    if(keys.d) right += 1;
+  } else {
+    forward = -joyValue.y;
+    right = joyValue.x;
+  }
+  // Movement physics
+  velocity.x += right * MOVE_SPD;
+  velocity.z += forward * MOVE_SPD;
+  velocity.x *= 0.82;
+  velocity.z *= 0.82;
+  // Gravity
+  velocity.y -= GRAVITY;
+  // Ground check
+  if(playerMesh.position.y <= 1.1) {
+    velocity.y = 0;
+    playerMesh.position.y = 1.1;
+    onGround = true;
+    if((keys[' '] && window.innerWidth > 800) || (joyActive && Math.abs(joyValue.y)<0.2 && Math.abs(joyValue.x)<0.2)) {
+      velocity.y = JUMP_POWER;
     }
-    function saveLeaderboard() {
-      localStorage.setItem('obby_leaderboard', JSON.stringify(leaderboard));
+  } else {
+    onGround = false;
+  }
+  // Move player
+  playerMesh.position.x += velocity.x;
+  playerMesh.position.y += velocity.y;
+  playerMesh.position.z += velocity.z;
+  // Boundaries
+  playerMesh.position.x = Math.max(-4, Math.min(4, playerMesh.position.x));
+  playerMesh.position.y = Math.max(0.5, playerMesh.position.y);
+  // Respawn if falls
+  if(playerMesh.position.y < -20) {
+    deaths++; updateStatsUI(); respawn();
+  }
+  // Collision with moving obstacles (simple)
+  movingObstacles.forEach(obs=>{
+    if(Math.abs(playerMesh.position.x-obs.position.x)<1.1 && Math.abs(playerMesh.position.y-obs.position.y)<1.1 && Math.abs(playerMesh.position.z-obs.position.z)<1.1) {
+      deaths++; updateStatsUI(); respawn();
     }
-    function updateLeaderboard() {
-      loadLeaderboard();
-      // Update own wins if in leaderboard, else add
-      if (playerName) {
-        let found = leaderboard.find(p => p.name === playerName);
-        if (found) {
-          found.wins = wins;
-          found.skin = playerSkin;
-        } else {
-          leaderboard.push({name: playerName, wins: wins, skin: playerSkin});
-        }
+  });
+  // Disappearing platforms: If not visible and on, fall!
+  disappearingPlatforms.forEach(disc=>{
+    if(disc.visible && Math.abs(playerMesh.position.x-disc.position.x)<1.5 && Math.abs(playerMesh.position.z-disc.position.z)<1.5 && Math.abs(playerMesh.position.y-1.1)<0.5) {
+      if(disc.material.opacity<0.4) {
+        deaths++; updateStatsUI(); respawn();
       }
-      leaderboard.sort((a,b) => b.wins - a.wins);
-      saveLeaderboard();
-      // Render
-      const tbody = document.getElementById('leaderboard-body');
-      tbody.innerHTML = '';
-      leaderboard.forEach((p,i) => {
-        const tr = document.createElement('tr');
-        if (i === 0) tr.className = 'top';
-        tr.innerHTML = `<td>${i+1}</td>
-          <td>${p.name || '---'}</td>
-          <td>${p.wins}</td>
-          <td><span style="display:inline-block;width:24px;height:24px;background:${p.skin};border-radius:6px;border:1px solid #fff;"></span></td>`;
-        tbody.appendChild(tr);
-      });
     }
-    loadLeaderboard();
+  });
+  // Update trail (cosmetic)
+  renderTrail();
+  // Stage & WIN
+  let currStage = Math.floor(playerMesh.position.z/PLATFORM_SPACING)+1;
+  if(currStage > OBBY_STAGES) currStage = OBBY_STAGES;
+  // Checkpoint logic
+  let nearestCP = checkpoints.filter(c=>c<=currStage).pop()||1;
+  if(nearestCP!==lastCheckpoint) {
+    lastCheckpoint = nearestCP;
+    updateCheckpointUI(lastCheckpoint);
+  }
+  if(currStage !== lastStage) {
+    lastStage = currStage;
+    lastStageLabel = DIFFICULTY_NAMES[STAGE_DIFFICULTY(currStage-1)];
+  }
+  const overlay = document.getElementById('overlay');
+  if(currStage>=OBBY_STAGES && !won) {
+    won = true; timerRunning = false;
+    overlay.innerHTML = `<span class="stage-label" style="background:#28ff7c44;color:#00f77a;">🏆 WIN! Συγχαρητήρια!</span><br>
+      <span class="stage-label" style="background:#1e90ff55;">+${multiplier} Win!</span><br>
+      <span style="color:#ffdc00;font-size:1.05em;">Χρόνος: ${formatTime(timer)} | Θάνατοι: ${deaths}</span>`;
+    wins += multiplier;
+    localStorage.setItem('obby_wins', wins);
+    if(!bestTime || timer<bestTime) { bestTime=timer; localStorage.setItem('obby_bestTime',bestTime);}
+    if(!bestDeaths || deaths<bestDeaths) { bestDeaths=deaths; localStorage.setItem('obby_bestDeaths',bestDeaths);}
     updateLeaderboard();
-
-    // Win button
-    const winBtn = document.getElementById('win-btn');
-    winBtn.addEventListener('click', () => {
-      if (!playerName) {
-        alert("Βάλε όνομα παίκτη!");
-        return;
-      }
-      wins += multiplier;
-      localStorage.setItem('obby_wins', wins);
-      updateLeaderboard();
-    });
-
-    // Restore wins per player
-    playerNameInput.addEventListener('blur', () => {
-      playerName = playerNameInput.value.trim();
-      let found = leaderboard.find(p => p.name === playerName);
-      wins = found ? found.wins : 0;
-      localStorage.setItem('obby_wins', wins);
-      updateLeaderboard();
-    });
+    setTimeout(()=>{won=false;overlay.innerHTML="Ξεκίνα πάλι για νέο win!";},3600);
+    setTimeout(resetRun,3500);
+  } else if(!won) {
+    overlay.innerHTML = `<span class="stage-label">${lastStageLabel}</span> | Stage <b>${currStage}</b> / ${OBBY_STAGES}`;
+  }
+  // Daily Challenge logic (demo)
+  if(won && timer<160 && deaths<=12) {
+    challengePanel.textContent = "🎉 Πέτυχες το daily challenge!";
+  } else {
+    challengePanel.textContent = "Daily Challenge: Complete in under 160s!";
+  }
+  // Camera follows
+  updateCamera();
+  renderer.render(scene, camera);
+}
+resetRun();
+animate();
+// RESIZE
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
   </script>
 </body>
 </html>
