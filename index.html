@@ -586,3 +586,301 @@ window.addEventListener('resize', ()=>{
   </script>
 </body>
 </html>
+<!-- Συνέχεια από το προηγούμενο index.html (γραμμές 501-1000+).
+     Εδώ προστίθενται επιπλέον features, βελτιώσεις και modularity, καθώς και περισσότερα σχόλια και helpers.
+     Τοποθέτησέ το μετά το <script> του πρώτου αρχείου ή ενσωμάτωσέ το για πλήρη λειτουργικότητα. -->
+<script>
+/* ====== ΠΕΡΙΣΣΟΤΕΡΑ COSMETICS ====== */
+// Simple accessories (π.χ. hat/pet)
+const accessories = [
+  { name: "Hat", color: "#e0e000" },
+  { name: "Pet", color: "#ff69b4" }
+];
+// Προσθήκη βασικού hat accessory στον player
+function addHat(mesh, color="#e0e000") {
+  const hatGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.2, 20);
+  const hatMat = new THREE.MeshStandardMaterial({color});
+  const hat = new THREE.Mesh(hatGeo, hatMat);
+  hat.position.set(0,0.7,0);
+  mesh.add(hat);
+}
+// Προσθήκη βασικού pet accessory στον player
+function addPet(mesh, color="#ff69b4") {
+  const petGeo = new THREE.SphereGeometry(0.35, 20, 12);
+  const petMat = new THREE.MeshStandardMaterial({color});
+  const pet = new THREE.Mesh(petGeo, petMat);
+  pet.position.set(1, -0.2, 0.5);
+  mesh.add(pet);
+}
+// Ενεργοποίηση cosmetics ανάλογα με επιλογή (μπορείς να προσθέσεις UI για επιλογή)
+addHat(playerMesh, "#e0e000");
+addPet(playerMesh, "#ff69b4");
+
+/* ====== ΗΧΟΙ (SOUNDS) ====== */
+// Προσθήκη ηχητικών εφέ (jump, win, checkpoint, fall)
+const sounds = {
+  jump: new Audio("https://cdn.jsdelivr.net/gh/ThatOneCalculator/SoundLibrary@main/Jump.ogg"),
+  win: new Audio("https://cdn.jsdelivr.net/gh/ThatOneCalculator/SoundLibrary@main/Win.ogg"),
+  checkpoint: new Audio("https://cdn.jsdelivr.net/gh/ThatOneCalculator/SoundLibrary@main/Powerup.ogg"),
+  fall: new Audio("https://cdn.jsdelivr.net/gh/ThatOneCalculator/SoundLibrary@main/Fall.ogg")
+};
+function playSound(name) {
+  if (sounds[name]) {
+    try { sounds[name].currentTime = 0; sounds[name].play(); } catch(e){}
+  }
+}
+
+/* ====== ΜΕΤΡΗΤΕΣ ΚΑΙ HELPERS ====== */
+// Εμφάνιση pop-up μηνυμάτων (π.χ. νέο checkpoint)
+function popupMessage(msg, color="#1e90ff") {
+  const div = document.createElement("div");
+  div.style.position = "absolute";
+  div.style.top = "25%";
+  div.style.left = "50%";
+  div.style.transform = "translate(-50%, -50%)";
+  div.style.background = color;
+  div.style.color = "#fff";
+  div.style.padding = "12px 32px";
+  div.style.borderRadius = "14px";
+  div.style.fontSize = "1.3em";
+  div.style.zIndex = 9999;
+  div.style.boxShadow = "0 7px 24px #0006";
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(), 1600);
+}
+
+/* ====== ΕΠΙΠΛΕΟΝ GAMEPLAY: GHOST RUNS ====== */
+// Αποθήκευση διαδρομής για ghost (απλό demo)
+let ghostPath = [];
+let ghostMesh = null;
+function recordGhost() {
+  if (!timerRunning || won) return;
+  ghostPath.push({
+    x: playerMesh.position.x,
+    y: playerMesh.position.y,
+    z: playerMesh.position.z
+  });
+  if (ghostPath.length > 1000) ghostPath.shift();
+}
+function renderGhost() {
+  if (!ghostMesh && ghostPath.length>0) {
+    const ghostGeo = new THREE.BoxGeometry(PLAYER_SIZE,PLAYER_SIZE,PLAYER_SIZE);
+    const ghostMat = new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:0.4});
+    ghostMesh = new THREE.Mesh(ghostGeo, ghostMat);
+    scene.add(ghostMesh);
+  }
+  if (ghostMesh && ghostPath.length>0) {
+    const idx = Math.floor(ghostPath.length*0.7);
+    ghostMesh.position.set(ghostPath[idx].x,ghostPath[idx].y,ghostPath[idx].z);
+  }
+}
+
+/* ====== DAILY CHALLENGE RANDOMIZER ====== */
+// Κάθε μέρα διαφορετικό challenge (random best time)
+function getDailyTarget() {
+  const base = 150 + (dailySeed%20);
+  return base;
+}
+challengePanel.textContent = `Daily Challenge: Complete in under ${getDailyTarget()}s!`;
+
+// Ενημέρωσε το daily challenge μήνυμα στο animate αν υπάρχει win
+function updateDailyChallengeUI() {
+  if(won && timer<getDailyTarget() && deaths<=12) {
+    challengePanel.textContent = "🎉 Πέτυχες το daily challenge!";
+  } else {
+    challengePanel.textContent = `Daily Challenge: Complete in under ${getDailyTarget()}s!`;
+  }
+}
+
+/* ====== ACHIEVEMENTS ====== */
+function showAchievement(text) {
+  popupMessage("Achievement: " + text, "#4caf50");
+  // Θα μπορούσες να το αποθηκεύεις και σε localStorage
+}
+
+/* ====== ΕΠΕΚΤΑΣΙΜΟΤΗΤΑ: STAGE EDITOR DEMO ====== */
+// (Απλό UI - μπορείς να επεκτείνεις να φτιάχνεις δικά σου stages)
+function openStageEditor() {
+  alert("Stage Editor - εδώ μπορείς να προσθέσεις UI για να φτιάχνεις δικά σου stages!");
+}
+
+/* ====== INGAME TUTORIAL ====== */
+function showTutorial() {
+  popupMessage("Tip: Κινήσου με WASD ή joystick. Πήδα με Space/Joystick tap. Απόφυγε τα εμπόδια!", "#ffb300");
+}
+/* ====== ΕΠΙΠΛΕΟΝ GAMEPLAY MODES ====== */
+let hardcoreMode = false;
+function toggleHardcore() {
+  hardcoreMode = !hardcoreMode;
+  popupMessage("Hardcore mode: "+(hardcoreMode ? "ON":"OFF"), "#b10dc9");
+  resetRun();
+}
+
+/* ====== ΕΠΙΠΛΕΟΝ ΕΦΕ ====== */
+// Particle effect στο win
+function winEffect() {
+  for(let i=0;i<44;i++) {
+    const div = document.createElement("div");
+    div.className = "trail-dot";
+    div.style.width = div.style.height = "14px";
+    div.style.background = `hsl(${Math.random()*360},90%,60%)`;
+    div.style.left = (window.innerWidth/2+Math.cos(i)*Math.random()*180)+"px";
+    div.style.top = (window.innerHeight/2+Math.sin(i)*Math.random()*130)+"px";
+    div.style.opacity = '0.8';
+    document.body.appendChild(div);
+    setTimeout(()=>div.remove(), 1100+Math.random()*600);
+  }
+}
+
+/* ====== ΑΝΑΒΑΘΜΙΣΜΕΝΟ GAMEPLAY LOOP ====== */
+// Τροποποίηση animate (ή αντικατάσταση του προηγούμενου) για όλα τα νέα features:
+let hardcodedAchievements = { 'firstWin': false, 'fast': false, 'lowDeaths': false, 'hardcore': false };
+function animateV2() {
+  requestAnimationFrame(animateV2);
+  // Timer
+  if(timerRunning && !won) {
+    timer += 1/60;
+    updateStatsUI();
+    recordGhost();
+  }
+  // Moving obstacles
+  movingObstacles.forEach(obs=>{
+    obs.position.x = obs.userData.origin + Math.sin(Date.now()/700)*2.1*obs.userData.dir;
+  });
+  // Disappearing platforms
+  disappearingPlatforms.forEach(disc=>{
+    disc.userData.t += 0.03;
+    let phase = Math.abs(Math.sin(disc.userData.t));
+    disc.material.opacity = 0.2 + 0.8*phase;
+    disc.visible = disc.material.opacity>0.25;
+  });
+  // Falling platforms
+  fallingPlatforms.forEach(fall=>{
+    if(!fall.userData.fallen) {
+      if(Math.abs(playerMesh.position.x-fall.position.x)<1.4 && Math.abs(playerMesh.position.z-fall.position.z)<1.4 && Math.abs(playerMesh.position.y-1.1)<0.49) {
+        fall.userData.fallen = true;
+        fall.userData.respawnTime = Date.now()+1500;
+        playSound('fall');
+      }
+    } else {
+      fall.position.y -= 0.22;
+      if(fall.position.y<-3 && Date.now()>fall.userData.respawnTime) {
+        fall.position.y = 0.1;
+        fall.userData.fallen = false;
+      }
+    }
+  });
+  // Trampolines
+  trampolines.forEach(tramp=>{
+    if(Math.abs(playerMesh.position.x-tramp.position.x)<1.2 && Math.abs(playerMesh.position.z-tramp.position.z)<1.2 && Math.abs(playerMesh.position.y-1.1)<0.6) {
+      velocity.y = 0.4;
+      playSound('jump');
+    }
+  });
+  // Movement input
+  let forward = 0, right = 0;
+  if(window.innerWidth > 800) {
+    if(keys.w) forward += 1;
+    if(keys.s) forward -= 1;
+    if(keys.a) right -= 1;
+    if(keys.d) right += 1;
+  } else {
+    forward = -joyValue.y;
+    right = joyValue.x;
+  }
+  velocity.x += right * MOVE_SPD;
+  velocity.z += forward * MOVE_SPD;
+  velocity.x *= 0.82;
+  velocity.z *= 0.82;
+  velocity.y -= GRAVITY;
+  if(playerMesh.position.y <= 1.1) {
+    velocity.y = 0;
+    playerMesh.position.y = 1.1;
+    onGround = true;
+    if((keys[' '] && window.innerWidth > 800) || (joyActive && Math.abs(joyValue.y)<0.2 && Math.abs(joyValue.x)<0.2)) {
+      velocity.y = JUMP_POWER;
+      playSound('jump');
+    }
+  } else {
+    onGround = false;
+  }
+  playerMesh.position.x += velocity.x;
+  playerMesh.position.y += velocity.y;
+  playerMesh.position.z += velocity.z;
+  playerMesh.position.x = Math.max(-4, Math.min(4, playerMesh.position.x));
+  playerMesh.position.y = Math.max(0.5, playerMesh.position.y);
+  // Hardcore mode
+  if(hardcoreMode && deaths>0 && !won) {
+    popupMessage("Hardcore failed! Ξαναρχίζεις.", "#b10dc9");
+    resetRun();
+  }
+  // Respawn if falls
+  if(playerMesh.position.y < -20) {
+    deaths++; updateStatsUI(); respawn();
+    playSound('fall');
+  }
+  // Collision με obstacles
+  movingObstacles.forEach(obs=>{
+    if(Math.abs(playerMesh.position.x-obs.position.x)<1.1 && Math.abs(playerMesh.position.y-obs.position.y)<1.1 && Math.abs(playerMesh.position.z-obs.position.z)<1.1) {
+      deaths++; updateStatsUI(); respawn();
+      playSound('fall');
+    }
+  });
+  // Disappearing platforms: If not visible and on, fall!
+  disappearingPlatforms.forEach(disc=>{
+    if(disc.visible && Math.abs(playerMesh.position.x-disc.position.x)<1.5 && Math.abs(playerMesh.position.z-disc.position.z)<1.5 && Math.abs(playerMesh.position.y-1.1)<0.5) {
+      if(disc.material.opacity<0.4) {
+        deaths++; updateStatsUI(); respawn();
+        playSound('fall');
+      }
+    }
+  });
+  // Trail
+  renderTrail();
+  // Ghost
+  renderGhost();
+  // Stage, Checkpoints & WIN
+  let currStage = Math.floor(playerMesh.position.z/PLATFORM_SPACING)+1;
+  if(currStage > OBBY_STAGES) currStage = OBBY_STAGES;
+  let nearestCP = checkpoints.filter(c=>c<=currStage).pop()||1;
+  if(nearestCP!==lastCheckpoint) {
+    lastCheckpoint = nearestCP;
+    updateCheckpointUI(lastCheckpoint);
+    playSound('checkpoint');
+    popupMessage("Checkpoint reached!", "#1e90ff");
+  }
+  if(currStage !== lastStage) {
+    lastStage = currStage;
+    lastStageLabel = DIFFICULTY_NAMES[STAGE_DIFFICULTY(currStage-1)];
+  }
+  const overlay = document.getElementById('overlay');
+  if(currStage>=OBBY_STAGES && !won) {
+    won = true; timerRunning = false; playSound('win'); winEffect();
+    overlay.innerHTML = `<span class="stage-label" style="background:#28ff7c44;color:#00f77a;">🏆 WIN! Συγχαρητήρια!</span><br>
+      <span class="stage-label" style="background:#1e90ff55;">+${multiplier} Win!</span><br>
+      <span style="color:#ffdc00;font-size:1.05em;">Χρόνος: ${formatTime(timer)} | Θάνατοι: ${deaths}</span>`;
+    wins += multiplier;
+    localStorage.setItem('obby_wins', wins);
+    if(!bestTime || timer<bestTime) { bestTime=timer; localStorage.setItem('obby_bestTime',bestTime);}
+    if(!bestDeaths || deaths<bestDeaths) { bestDeaths=deaths; localStorage.setItem('obby_bestDeaths',bestDeaths);}
+    updateLeaderboard();
+    // Achievements
+    if(wins===1 && !hardcodedAchievements.firstWin) { showAchievement('First Win!'); hardcodedAchievements.firstWin=true; }
+    if(timer < 100 && !hardcodedAchievements.fast) { showAchievement('Speedrunner!'); hardcodedAchievements.fast=true;}
+    if(deaths<=2 && !hardcodedAchievements.lowDeaths) { showAchievement('Almost Flawless!'); hardcodedAchievements.lowDeaths=true;}
+    if(hardcoreMode && !hardcodedAchievements.hardcore) { showAchievement('Hardcore Win!'); hardcodedAchievements.hardcore=true;}
+    setTimeout(()=>{won=false;overlay.innerHTML="Ξεκίνα πάλι για νέο win!";},3600);
+    setTimeout(resetRun,3500);
+  } else if(!won) {
+    overlay.innerHTML = `<span class="stage-label">${lastStageLabel}</span> | Stage <b>${currStage}</b> / ${OBBY_STAGES}`;
+  }
+  updateDailyChallengeUI();
+  updateCamera();
+  renderer.render(scene, camera);
+}
+resetRun();
+animateV2();
+showTutorial();
+</script>
+<!-- ΤΕΛΟΣ! -->
